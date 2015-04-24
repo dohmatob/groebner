@@ -20,7 +20,7 @@ def _div(a, b):
 
 
 def f4_reduction(F, f):
-    """Reduce the multivariate poly modulo the set finite set F of polys"""
+    """Reduce the multivariate poly modulo the finite set polys F"""
     r = 0
     q = [0 for _ in F]
     p = f
