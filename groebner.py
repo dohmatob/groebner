@@ -53,7 +53,7 @@ def f4_reduction(f, F, verbose=1):
                 step, p, q[0], q[1], r)
         divided = False
         for i, fi in enumerate(F):
-            Q, R = div(_LT(p), _LT(fi))
+            Q, R = _div(_LT(p), _LT(fi))
             if R == 0:
                 q[i] = (q[i] + Q).expand()
                 p = (p - Q * fi).expand()
@@ -106,6 +106,13 @@ def test_f4_reduction():
     assert_equal(f4_reduction(x ** 3 + x ** 2 * y + x * y ** 2 + y ** 3,
                               [x * y + 1, x + 1]),
                  ([x + y, x ** 2 - x], y ** 3 - y))
+
+
+def test_buchberger():
+    assert_equal(buchberger([x ** 2 - y * z, y ** 2 - z * x,
+                             z ** 2 - x * y]),
+                 [x ** 2 - y * z, -x * z + y ** 2, -x * y + z ** 2,
+                  y ** 3 - z ** 3])
 
 
 if __name__ == "__main__":
