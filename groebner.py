@@ -1,6 +1,7 @@
 # author: DOHMATOB Elvis Dopgima <gmdopp@gmail.com>
 
 import numbers
+import itertools
 from sympy import Symbol
 from sympy.polys import LT, div, lcm
 from sympy.polys.polyerrors import ComputationFailed
@@ -32,7 +33,7 @@ def spoly(f, g):
     return ((common * g) / lt_g - (common * f) / lt_f).expand()
 
 
-def f4_reduction(f, F):
+def f4_reduction(f, F, verbose=1):
     """Reduce the multivariate poly modulo the finite set polys F
 
     References
@@ -43,10 +44,13 @@ def f4_reduction(f, F):
     q = [0 for _ in F]
     p = f
     step = 0
-    print "F4 reduction of %s mod %s" % (f, F)
-    print "+++\r\n"
+    if verbose:
+        print "F4 reduction of %s mod %s" % (f, F)
+        print "+++\r\n"
     while p != 0:
-        print "%s: p = %s, q1 = %s, q2 = %s, r = %s" % (step, p, q[0], q[1], r)
+        if verbose:
+            print "%s: p = %s, q1 = %s, q2 = %s, r = %s" % (
+                step, p, q[0], q[1], r)
         divided = False
         for i, fi in enumerate(F):
             Q, R = div(_LT(p), _LT(fi))
@@ -60,11 +64,31 @@ def f4_reduction(f, F):
             r = (r + lt).expand()
             p = (p - lt).expand()
         step += 1
-    print "_" * 80
-    print "%s = %s + %s" % (
-        f, " + ".join(["(%s)(%s)" % (qi, fi) for qi, fi in zip(q, F)
+    if verbose:
+        print "_" * 80
+        print "%s = %s + %s" % (
+            f, " + ".join(["(%s)(%s)" % (qi, fi) for qi, fi in zip(q, F)
                        if not isinstance(qi, numbers.Number)]), r)
     return q, r
+
+
+def buchberger(F):
+    """Bruno Buchberger's algorithm
+
+    Computes Groebner basis for the polynomial ideal spanned by F."""
+    G = F
+    C = list(itertools.product(F, F))
+    cnt = 0
+    while C:
+        for fi, fj in C:
+            C.remove((fi, fj))
+            h = f4_reduction(spoly(fi, fj), G, verbose=0)[1]
+            print "%3i: spol(%s, %s) mod F = %s" % (cnt, fi, fj, h)
+            cnt += 1
+            if h != 0:
+                C += list(itertools.product(G, [h]))
+                G += [h]
+    return G
 
 
 def test_spoly():
