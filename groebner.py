@@ -33,7 +33,12 @@ def spoly(f, g):
 
 
 def f4_reduction(f, F):
-    """Reduce the multivariate poly modulo the finite set polys F"""
+    """Reduce the multivariate poly modulo the finite set polys F
+
+    References
+    ----------
+    [1] http://algant.eu/documents/theses/thieu.pdf
+    """
     r = 0
     q = [0 for _ in F]
     p = f
