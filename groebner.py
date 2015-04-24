@@ -1,8 +1,13 @@
 # author: DOHMATOB Elvis Dopgima <gmdopp@gmail.com>
 
 import numbers
-from sympy.polys import LT, div
+from sympy import Symbol
+from sympy.polys import LT, div, lcm
 from sympy.polys.polyerrors import ComputationFailed
+from nose.tools import assert_equal
+
+# misc
+x, y, z = map(Symbol, "xyz")
 
 
 def _LT(f):
@@ -19,7 +24,15 @@ def _div(a, b):
         return 0, a
 
 
-def f4_reduction(F, f):
+def spoly(f, g):
+    """Computes the S-polynomial of f and g"""
+    lt_f = _LT(f)
+    lt_g = _LT(g)
+    common = lcm(lt_f, lt_g)
+    return ((common * g) / lt_g - (common * f) / lt_f).expand()
+
+
+def f4_reduction(f, F):
     """Reduce the multivariate poly modulo the finite set polys F"""
     r = 0
     q = [0 for _ in F]
@@ -38,11 +51,29 @@ def f4_reduction(F, f):
                 divided = True
                 break
         if not divided:
-            r = (r + _LT(p)).expand()
-            p = (p - _LT(p)).expand()
+            lt = _LT(p)
+            r = (r + lt).expand()
+            p = (p - lt).expand()
         step += 1
     print "_" * 80
     print "%s = %s + %s" % (
         f, " + ".join(["(%s)(%s)" % (qi, fi) for qi, fi in zip(q, F)
                        if not isinstance(qi, numbers.Number)]), r)
     return q, r
+
+
+def test_spoly():
+    assert_equal(spoly(-1, 3 * x * z ** 2 - y), y)
+    assert_equal(spoly(x ** 4 * y - z ** 2, 3 * x * z ** 2 - y),
+                 3 * z ** 4 - x ** 3 * y ** 2)
+    assert_equal(spoly(4 * x ** 2 * z - 7 * y ** 2,
+                       x * y * z ** 2 + 3 * x * z ** 4),
+                 12 * x ** 2 * z ** 4 + 7 * y ** 3 * z)
+
+
+def test_f4_reduction():
+    assert_equal(f4_reduction(x ** 2 * y + y - 2, [x * y + 1, x + 1]),
+                 ([x, -1], y - 1))
+    assert_equal(f4_reduction(x ** 3 + x ** 2 * y + x * y ** 2 + y ** 3,
+                              [x * y + 1, x + 1]),
+                 ([x + y, x ** 2 - x], y ** 3 - y))
