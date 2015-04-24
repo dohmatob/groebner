@@ -106,3 +106,7 @@ def test_f4_reduction():
     assert_equal(f4_reduction(x ** 3 + x ** 2 * y + x * y ** 2 + y ** 3,
                               [x * y + 1, x + 1]),
                  ([x + y, x ** 2 - x], y ** 3 - y))
+
+
+if __name__ == "__main__":
+    print buchberger([x ** 2 - y * z, y ** 2 - z * x, z ** 2 - x * y])
